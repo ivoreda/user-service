@@ -4,15 +4,17 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class CustomUser(AbstractUser):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=11, unique=True)
+    gender = models.CharField(max_length=7, blank=True, null=True)
+    dob = models.CharField(max_length=7, blank=True, null=True)
     username = models.CharField(max_length=20)
-    hobbies = models.JSONField(default={})
+    hobbies = models.JSONField(default={}, blank=True, null=True)
 
     REQUIRED_FIELDS = ['username']
-    USERNAME_FIELD = 'phone_number'
+    USERNAME_FIELD = 'email'
 
     def __str__(self) -> str:
         return self.username

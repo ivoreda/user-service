@@ -6,7 +6,7 @@ from . import models
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
-        fields = ['phone_number', 'password']
+        fields = ['email', 'password']
 
 
 class UserSerializer(serializers.ModelSerializer):

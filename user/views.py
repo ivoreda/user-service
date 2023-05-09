@@ -15,11 +15,11 @@ class LoginView(APIView):
     serializer_class = serializers.LoginSerializer
 
     def post(self, request):
-        phone_number = request.data['phone_number']
+        email = request.data['email']
         password = request.data['password']
 
         try:
-            user = models.CustomUser.objects.filter(phone_number=phone_number).first()
+            user = models.CustomUser.objects.filter(email=email).first()
             if user is None:
                 return Response({'status': False, 'message':'user not found'})
             if not user.check_password(password):
@@ -63,9 +63,6 @@ class UserView(APIView):
         serializer = self.serializer_class(user)
         return Response({"status":True, "message":"user retrieved successfully","data":serializer.data})
 
-
-
-
 class UpdateUserView(APIView):
     authentication_classes = [TokenAuthentication]
     serializer_class = serializers.UpdateHobbiesSerializeer
@@ -86,3 +83,8 @@ class UpdateUserView(APIView):
         user.save()
         serializer = serializers.UserSerializer(user)
         return Response({"status":True, "message":"user hobbies updated successfully","data":serializer.data})
+
+class ForgotPasswordView(APIView):
+    pass
+class ResetPasswordView(APIView):
+    pass
