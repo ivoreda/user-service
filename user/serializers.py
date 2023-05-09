@@ -12,7 +12,7 @@ class LoginSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
-        fields = ['id', 'email', 'username', 'phone_number', 'hobbies', 'first_name',
+        fields = ['id', 'email', 'username', 'phone_number', 'dob', 'gender', 'hobbies', 'first_name',
                   'last_name', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -24,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
 class ResponseSerializer(serializers.Serializer):
     status = serializers.BooleanField(default=True)
     message = serializers.CharField(default='Data retrieved successfully')
@@ -31,6 +32,6 @@ class ResponseSerializer(serializers.Serializer):
 
 
 class UpdateHobbiesSerializeer(serializers.ModelSerializer):
-       class Meta:
+    class Meta:
         model = models.CustomUser
         fields = ['hobbies']
