@@ -8,8 +8,8 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=11, unique=True)
-    gender = models.CharField(max_length=7, blank=True, null=True)
-    dob = models.CharField(max_length=7, blank=True, null=True)
+    gender = models.CharField(max_length=15, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
     username = models.CharField(max_length=20)
     hobbies = models.JSONField(default={}, blank=True, null=True)
 
