@@ -66,7 +66,7 @@ ROOT_URLCONF = "user_service_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -163,3 +163,11 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",  # new
     ],
 }
+
+# Email config
+EMAIL_HOST = 'mail.the99keys.com'
+EMAIL_HOST_USER = 'ivor.e@the99keys.com'
+EMAIL_HOST_PASSWORD = '1Vor#ee!!'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

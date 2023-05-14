@@ -12,9 +12,32 @@ class CustomUser(AbstractUser):
     dob = models.DateField(blank=True, null=True)
     username = models.CharField(max_length=20)
     hobbies = models.JSONField(default={}, blank=True, null=True)
+    isVerified = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['username']
     USERNAME_FIELD = 'email'
 
     def __str__(self) -> str:
         return self.username
+
+class EmailVerificationLogs(models.Model):
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    isUsed = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.email
+
+class PasswordRecoveryLogs(models.Model):
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    isUsed = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.email
