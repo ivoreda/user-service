@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from datetime import timedelta
 import os
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 from pathlib import Path
 
@@ -44,6 +49,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "rest_framework",
     "corsheaders",
+    "cloudinary",
+    "rest_framework_simplejwt",
 
     # Local
 
@@ -89,6 +96,18 @@ WSGI_APPLICATION = "user_service_project.wsgi.application"
 #     "default": {
 #         "ENGINE": "django.db.backends.sqlite3",
 #         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
+# Local postgres
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME':'99apartment_userService',
+#         'USER':'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'localhost',
+#         'PORT': 5432,
 #     }
 # }
 
@@ -159,10 +178,21 @@ CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",  # new
-    ],
+    #  "DEFAULT_PERMISSION_CLASSES": [
+    #     "rest_framework.permissions.AllowAny",  # new
+    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+    )
 }
+
+# CLoudinary config
+cloudinary.config(
+  cloud_name = "groundworks",
+  api_key = "665148592363434",
+  api_secret = "d00bD14YLSvFD6kaoeEUJ5rlz9U"
+)
 
 # Email config
 EMAIL_HOST = 'mail.the99keys.com'
@@ -171,3 +201,12 @@ EMAIL_HOST_PASSWORD = '1Vor#ee!!'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+SIMPLE_JWT = {
+    # Overriding the access token lifetime from the default 5 minutes to 10
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "TOKEN_OBTAIN_SERIALIZER": "user.serializers.CustomTokenGeneratorSerializer",
+}

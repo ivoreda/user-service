@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
         fields = ['id', 'email', 'username', 'phone_number', 'dob', 'gender', 'hobbies', 'first_name',
-                  'last_name', 'isVerified', 'password']
+                  'last_name', 'isVerified', 'profile_picture', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -31,11 +31,24 @@ class ResponseSerializer(serializers.Serializer):
     data = UserSerializer(many=True)
 
 
-class UpdateHobbiesSerializeer(serializers.ModelSerializer):
+class UpdateHobbiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
         fields = ['hobbies']
 
+
+class UpdateProfilePictureSerializer(serializers.ModelSerializer):
+    profile_picture_url = serializers.ReadOnlyField()
+
+    class Meta:
+        model = models.CustomUser
+        fields = ['profile_picture_url', 'profile_picture']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("profie_picture")
+
+        return representation
 
 class ChangePasswordSerializer(serializers.Serializer):
     """Serializer for password change"""
@@ -76,3 +89,15 @@ class VerifyEmailWithCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.EmailVerificationLogs
         fields = ['code', 'email']
+
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['gender'] = user.gender
+        token['phone_number'] = user.phone_number
+        return token

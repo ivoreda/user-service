@@ -2,11 +2,18 @@ from django.core.mail import EmailMessage
 import random
 from django.conf import settings
 from django.shortcuts import render
+from django.contrib.auth import get_user_model
+
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
+
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.parsers import MultiPartParser
 from rest_framework import status
+
 
 from . import serializers
 from . import models
@@ -14,10 +21,16 @@ from . import models
 import jwt
 import datetime
 
+
+User = get_user_model()
 # Create your views here.
 
 
 class LoginView(APIView):
+    """
+    This view is no longer in use becaue we have added simple-jwt
+    to handle token generation and logging in.
+    """
     serializer_class = serializers.LoginSerializer
 
     def post(self, request):
@@ -30,8 +43,8 @@ class LoginView(APIView):
                 return Response({'status': False, 'message': 'user not found'})
             if not user.check_password(password):
                 return Response({'status': False, 'message': 'incorrect password'})
-            if not user.isVerified:
-                return Response({'status': False, 'message': 'This user is not verified'})
+            # if not user.isVerified:
+            #     return Response({'status': False, 'message': 'This user is not verified'})
             payload = {'id': user.id,
                        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
                        'iat': datetime.datetime.utcnow()}
@@ -52,47 +65,31 @@ class SignupView(APIView):
         code = generate_user_verification_code()
         user_email_verification_log = models.EmailVerificationLogs.objects.create(
             email=email, code=code)
-        send_verification_code_to_email(
-            email, code, email_type='User verification')
+        # send_verification_code_to_email(
+        #     email, code, email_type='User verification')
         # make endpoint that confirms the user email and code
         # and verifies it
         return Response({'status': 'True', 'message': 'user created successfully. Check your email for a verification code', 'data': serializer.data})
 
 
-class UserView(APIView):
-    authentication_classes = [TokenAuthentication]
+class GetUserView(APIView):
+    # authentication_classes = [TokenAuthentication]
     serializer_class = serializers.UserSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        token = request.headers.get('Authorization')
-        if token is None:
-            raise AuthenticationFailed('unauthenticated')
-        print("here is the token", token)
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('unauthenticated')
-        user_id = payload['id']
-        user = models.CustomUser.objects.filter(id=user_id).first()
-        if user is None:
-            return Response({'status': False, 'message': 'user not found'})
-        serializer = self.serializer_class(user)
+        user = User.objects.get(id=request.user.id)
+        serializer = self.serializer_class(request.user)
         return Response({"status": True, "message": "user retrieved successfully", "data": serializer.data})
 
 
-class UpdateUserView(APIView):
-    authentication_classes = [TokenAuthentication]
-    serializer_class = serializers.UpdateHobbiesSerializeer
+class UpdateHobbiesView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.UpdateHobbiesSerializer
 
     def patch(self, request):
         hobbies = request.data['hobbies']
-        token = request.headers.get('Authorization')
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('unauthenticated')
-        user_id = payload['id']
-        user = models.CustomUser.objects.filter(id=user_id).first()
+        user = User.objects.get(id=request.user.id)
         if user is None:
             return Response({'status': False, 'message': 'user not found'})
         print("hobbies", user.hobbies)
@@ -100,6 +97,17 @@ class UpdateUserView(APIView):
         user.save()
         serializer = serializers.UserSerializer(user)
         return Response({"status": True, "message": "user hobbies updated successfully", "data": serializer.data})
+
+class UpdateProfilePictureView(CreateAPIView):
+    # authentication_classes = [TokenAuthentication]
+    serializer_class = serializers.UpdateProfilePictureSerializer
+    parser_classes = (MultiPartParser,)
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            image = serializer.data.get('profile_picture')
+
 
 
 def generate_user_verification_code():
@@ -148,7 +156,7 @@ class EmailVerificationView(APIView):
 
 class SendEmailVerificationCodeView(APIView):
     serializer_class = serializers.SendEmailVerificationCodeSerializer
-    authentication_classes = [TokenAuthentication]
+    # authentication_classes = [TokenAuthentication]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -231,7 +239,7 @@ class ResetPasswordView(APIView):
 
 class ChangePasswordView(APIView):
     serializer_class = serializers.ChangePasswordSerializer
-    authentication_classes = [TokenAuthentication]
+    # authentication_classes = [TokenAuthentication]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
