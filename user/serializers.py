@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 
 from . import models
@@ -13,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
         fields = ['id', 'email', 'username', 'phone_number', 'dob', 'gender', 'hobbies', 'first_name',
-                  'last_name', 'isVerified', 'profile_picture', 'password']
+                  'last_name', 'isVerified', 'profile_picture', 'password', 'is_active']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -31,10 +32,11 @@ class ResponseSerializer(serializers.Serializer):
     data = UserSerializer(many=True)
 
 
-class UpdateHobbiesSerializer(serializers.ModelSerializer):
+class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
-        fields = ['hobbies']
+        fields = ['first_name', 'last_name',
+                  'username', 'dob', 'hobbies', 'interests']
 
 
 class UpdateProfilePictureSerializer(serializers.ModelSerializer):
@@ -50,6 +52,7 @@ class UpdateProfilePictureSerializer(serializers.ModelSerializer):
 
         return representation
 
+
 class ChangePasswordSerializer(serializers.Serializer):
     """Serializer for password change"""
     old_password = serializers.CharField(required=True)
@@ -61,9 +64,11 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
     class Meta:
         model = models.PasswordRecoveryLogs
         fields = ['email']
+
 
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -91,9 +96,6 @@ class VerifyEmailWithCodeSerializer(serializers.ModelSerializer):
         fields = ['code', 'email']
 
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-
 class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -101,3 +103,17 @@ class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
         token['gender'] = user.gender
         token['phone_number'] = user.phone_number
         return token
+
+
+class DeactivateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.CustomUser
+        fields = ['is_active']
+
+
+class ActivateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.CustomUser
+        fields = ['email']

@@ -12,7 +12,10 @@ urlpatterns = [
     path('login/', views.LoginView.as_view()),
     path('signup/', views.SignupView.as_view()),
     path('get-user/', views.GetUserView.as_view()),
-    path('update-user-hobbies/', views.UpdateHobbiesView.as_view()),
+    path('update-user/', views.UpdateUserView.as_view()),
+    path('deactivate-account/', views.DeactivateUserView.as_view()),
+    path('activate-account/', views.ActivateUserView.as_view()),
+
     # path('update-profile-picture', views.UpdateProfilePictureView.as_view()),
 
     path('verify-email/', views.EmailVerificationView.as_view()),

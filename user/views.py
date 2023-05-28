@@ -83,20 +83,26 @@ class GetUserView(APIView):
         return Response({"status": True, "message": "user retrieved successfully", "data": serializer.data})
 
 
-class UpdateHobbiesView(APIView):
+class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = serializers.UpdateHobbiesSerializer
+    serializer_class = serializers.UpdateUserSerializer
 
     def patch(self, request):
-        hobbies = request.data['hobbies']
-        user = User.objects.get(id=request.user.id)
-        if user is None:
-            return Response({'status': False, 'message': 'user not found'})
-        print("hobbies", user.hobbies)
-        user.hobbies.update(hobbies)
-        user.save()
-        serializer = serializers.UserSerializer(user)
-        return Response({"status": True, "message": "user hobbies updated successfully", "data": serializer.data})
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            user = User.objects.filter(id=request.user.id).first()
+            if user is None:
+                return Response({'status': False, 'message': 'user not found'})
+            user.first_name = serializer.data.get('first_name')
+            user.last_name = serializer.data.get('last_name')
+            user.username = serializer.data.get('username')
+            user.dob = serializer.data.get('dob')
+            user.hobbies = serializer.data.get('hobbies')
+            user.interests = serializer.data.get('interests')
+            user.save()
+        return Response({"status": True, "message": "user updated successfully", "data": {user}})
+
 
 class UpdateProfilePictureView(CreateAPIView):
     # authentication_classes = [TokenAuthentication]
@@ -107,7 +113,6 @@ class UpdateProfilePictureView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             image = serializer.data.get('profile_picture')
-
 
 
 def generate_user_verification_code():
@@ -222,7 +227,7 @@ class ResetPasswordView(APIView):
             log = models.PasswordRecoveryLogs.objects.filter(
                 email=email).first()
             if not log:
-                return Response({"status": False,"message":"Password recovery logs not generated"})
+                return Response({"status": False, "message": "Password recovery logs not generated"})
             if log.email == email and log.code == code:
                 user = models.CustomUser.objects.filter(email=email).first()
                 user.set_password(new_password)
@@ -239,19 +244,14 @@ class ResetPasswordView(APIView):
 
 class ChangePasswordView(APIView):
     serializer_class = serializers.ChangePasswordSerializer
-    # authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        token = request.headers.get('Authorization')
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('unauthenticated')
-        user_id = payload['id']
-        user = models.CustomUser.objects.filter(id=user_id).first()
-        if user is None:
-            return Response({'status': False, 'message': 'user not found'})
+            user = User.objects.get(id=request.user.id)
+        except Exception:
+            raise AuthenticationFailed('user not found')
         if serializer.is_valid():
             if not user.check_password(serializer.data.get('old_password')):
                 return Response({"status": False, "message": "Old password is wrong"}, status=status.HTTP_400_BAD_REQUEST)
@@ -263,3 +263,29 @@ class ChangePasswordView(APIView):
             }
             return Response(response)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeactivateUserView(APIView):
+    serializer_class = serializers.DeactivateUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = User.objects.get(id=request.user.id)
+        user.is_active = False
+        user.save()
+        return Response({"status": True, "message": "Account has been deactivated"})
+
+
+class ActivateUserView(APIView):
+    serializer_class = serializers.ActivateUserSerializer
+
+    def post(self, request):
+        email = request.data.get('email')
+        user = User.objects.get(email=email)
+        if user is None:
+            return Response({"status": False, "message": "Account does not exist"})
+        if user.is_active == True:
+            return Response({"status": False, "message": "Account is already activated"})
+        user.is_active = True
+        user.save()
+        return Response({"status": True, "message": "Account has been activated"})
