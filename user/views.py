@@ -55,7 +55,7 @@ class LoginView(APIView):
 
 
 class SignupView(APIView):
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.UserSignupSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -105,7 +105,7 @@ class UpdateUserView(APIView):
 
 
 class UpdateProfilePictureView(CreateAPIView):
-    # authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.UpdateProfilePictureSerializer
     parser_classes = (MultiPartParser,)
 

@@ -10,11 +10,11 @@ class LoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
-        fields = ['id', 'email', 'username', 'phone_number', 'dob', 'gender', 'hobbies', 'first_name',
-                  'last_name', 'isVerified', 'profile_picture', 'password', 'is_active']
+        fields = ['email', 'username', 'phone_number',
+                  'dob', 'gender', 'first_name', 'last_name', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -24,6 +24,14 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CustomUser
+        fields = ['id', 'email', 'username', 'phone_number', 'dob', 'gender', 'hobbies', 'first_name',
+                  'last_name', 'isVerified', 'profile_picture', 'password', 'is_active']
+
 
 
 class ResponseSerializer(serializers.Serializer):
