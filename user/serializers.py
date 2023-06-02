@@ -29,8 +29,9 @@ class UserSignupSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
-        fields = ['email', 'username', 'phone_number', 'dob',
-                  'gender', 'hobbies', 'first_name', 'last_name']
+        fields = ['id', 'email', 'first_name', 'last_name',
+                  'username', 'phone_number', 'dob',
+                  'gender', 'hobbies', 'interests']
 
 
 class ResponseSerializer(serializers.Serializer):
