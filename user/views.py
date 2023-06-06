@@ -182,9 +182,8 @@ class SendEmailVerificationCodeView(APIView):
                     log.isUsed = False
                     log.code = generate_user_verification_code()
                     log.save()
-                    old_code = log.code
                     send_verification_code_to_email(
-                        user_email, old_code, email_type='User verification')
+                        user_email, log.code, email_type='User verification')
                     return Response({"status": True, "message": "verification code sent to {email}".format(email=user_email)})
 
 
