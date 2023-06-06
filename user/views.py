@@ -65,10 +65,8 @@ class SignupView(APIView):
         code = generate_user_verification_code()
         user_email_verification_log = models.EmailVerificationLogs.objects.create(
             email=email, code=code)
-        # send_verification_code_to_email(
-        #     email, code, email_type='User verification')
-        # make endpoint that confirms the user email and code
-        # and verifies it
+        send_verification_code_to_email(
+            email, code, email_type='User verification')
         return Response({'status': 'True', 'message': 'user created successfully. Check your email for a verification code', 'data': serializer.data})
 
 
@@ -196,7 +194,10 @@ class ForgotPasswordView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            email = serializer.data.get('email')
+            email = serializer.data.get('email').lower()
+            user = User.objects.get(email=email)
+            if not user:
+                return Response({"status": False, "message": "User with this email {email} does not exist".format(email=email)})
             log = models.PasswordRecoveryLogs.objects.filter(
                 email=email).first()
             if not log:
@@ -221,7 +222,7 @@ class ResetPasswordView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            email = serializer.data.get('email')
+            email = serializer.data.get('email').lower()
             code = serializer.data.get('code')
             new_password = serializer.data.get('new_password')
             log = models.PasswordRecoveryLogs.objects.filter(
@@ -231,6 +232,7 @@ class ResetPasswordView(APIView):
             if log.email == email and log.code == code:
                 user = models.CustomUser.objects.filter(email=email).first()
                 user.set_password(new_password)
+                user.save()
                 log.isUsed = True
                 log.save()
                 return Response({"status": True, "message": "password reset successful"})

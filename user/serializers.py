@@ -27,11 +27,16 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    currency_preference = serializers.SerializerMethodField()
     class Meta:
         model = models.CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name',
-                  'username', 'phone_number', 'dob',
+        fields = ['id', 'email', 'first_name', 'last_name', 'currency_preference',
+                  'username', 'phone_number', 'dob', 'isVerified',
                   'gender', 'hobbies', 'interests']
+
+    def get_currency_preference(self, obj):
+        profile = models.Profile.objects.get(user=obj)
+        return profile.currency_preference
 
 
 class ResponseSerializer(serializers.Serializer):
