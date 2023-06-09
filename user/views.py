@@ -99,7 +99,7 @@ class UpdateUserView(APIView):
             user.hobbies = serializer.data.get('hobbies')
             user.interests = serializer.data.get('interests')
             user.save()
-        return Response({"status": True, "message": "user updated successfully", "data": {user}})
+        return Response({"status": True, "message": "user updated successfully"})
 
 
 class UpdateProfilePictureView(CreateAPIView):
@@ -273,6 +273,7 @@ class DeactivateUserView(APIView):
     def post(self, request):
         user = User.objects.get(id=request.user.id)
         user.is_active = False
+        user.profile.reason_for_deactivation = request.data['reason_for_deactivation']
         user.save()
         return Response({"status": True, "message": "Account has been deactivated"})
 
@@ -288,5 +289,6 @@ class ActivateUserView(APIView):
         if user.is_active == True:
             return Response({"status": False, "message": "Account is already activated"})
         user.is_active = True
+        user.profile.reason_for_deactivation = "Account is active."
         user.save()
-        return Response({"status": True, "message": "Account has been activated"})
+        return Response({"status": True, "message": "Account has been activated successfully"})

@@ -30,6 +30,8 @@ then on the host login, we will check if the user_type is host
 in order for the personto login to that platform
 """
 
+
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=20)
@@ -55,9 +57,15 @@ class CustomUser(AbstractUser):
             f"https://res.cloudinary.com/dpoix2ilz/{self.profile_picture}"
         )
 
+
+PROFILE_TYPE = (('Tenant', 'Tenant'),
+                ('Landlord', 'Landlord'),)
+
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     currency_preference = models.CharField(default='NGN')
+    profile_type = models.CharField(choices=PROFILE_TYPE, default='Tenant', max_length=255)
+    reason_for_deactivation = models.TextField(default='')
 
     @receiver(post_save, sender=CustomUser)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -69,7 +77,7 @@ class Profile(models.Model):
         instance.profile.save()
 
     def __str__(self) -> str:
-        return self.user.first_name + self.user.last_name
+        return self.user.first_name + " " + self.user.last_name
 
 class EmailVerificationLogs(models.Model):
     email = models.EmailField()

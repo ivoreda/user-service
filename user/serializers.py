@@ -28,15 +28,22 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     currency_preference = serializers.SerializerMethodField()
+    profile_type = serializers.SerializerMethodField()
+
     class Meta:
         model = models.CustomUser
         fields = ['id', 'email', 'first_name', 'last_name', 'currency_preference',
-                  'username', 'phone_number', 'dob', 'isVerified',
-                  'gender', 'hobbies', 'interests']
+                  'profile_type', 'username', 'phone_number',
+                  'dob', 'isVerified', 'gender', 'hobbies', 'interests',
+                  'is_staff', 'is_active', 'is_superuser']
 
     def get_currency_preference(self, obj):
         profile = models.Profile.objects.get(user=obj)
         return profile.currency_preference
+
+    def get_profile_type(self, obj):
+        profile = models.Profile.objects.get(user=obj)
+        return profile.profile_type
 
 
 class ResponseSerializer(serializers.Serializer):
@@ -119,10 +126,11 @@ class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
 
 
 class DeactivateUserSerializer(serializers.ModelSerializer):
+    reason_for_deactivation = serializers.CharField()
 
     class Meta:
-        model = models.CustomUser
-        fields = ['is_active']
+        model = models.Profile
+        fields = ['reason_for_deactivation']
 
 
 class ActivateUserSerializer(serializers.ModelSerializer):
