@@ -39,7 +39,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=15, unique=True)
     gender = models.CharField(max_length=15, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
-    username = models.CharField(max_length=20)
+    username = models.CharField(max_length=20, unique=True)
     hobbies = models.TextField(default='Hobbies', blank=True, null=True)
     interests = models.TextField(default='Interests', blank=True, null=True)
     isVerified = models.BooleanField(default=False)

@@ -1,8 +1,14 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
+from rest_framework.response import Response
+from django.utils.translation import gettext_lazy as _
+
+from django .contrib.auth import get_user_model
+
 
 from . import models
 
+User = get_user_model()
 
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,6 +22,13 @@ class UserSignupSerializer(serializers.ModelSerializer):
         fields = ['email', 'username', 'phone_number',
                   'dob', 'gender', 'first_name', 'last_name', 'password']
         extra_kwargs = {'password': {'write_only': True}}
+
+    def validate_email(self, value):
+        qs = User.objects.filter(email__iexact=value)
+        if qs.exists():
+            raise serializers.ValidationError(
+                "User with this email already exists")
+        return value
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
@@ -117,12 +130,16 @@ class VerifyEmailWithCodeSerializer(serializers.ModelSerializer):
 
 
 class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
+    default_error_messages = {
+        'no_active_account': _('invalid credentials')
+    }
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token['gender'] = user.gender
         token['phone_number'] = user.phone_number
-        return token
+        token['isVerified'] = user.isVerified
+        return {token, user.isVerified}
 
 
 class DeactivateUserSerializer(serializers.ModelSerializer):
