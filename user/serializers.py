@@ -138,8 +138,7 @@ class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['gender'] = user.gender
         token['phone_number'] = user.phone_number
-        token['isVerified'] = user.isVerified
-        return {token, user.isVerified}
+        return token
 
 
 class DeactivateUserSerializer(serializers.ModelSerializer):
