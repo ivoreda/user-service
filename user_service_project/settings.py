@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "cloudinary",
     "rest_framework_simplejwt",
-    "drf_yasg",
 
     # Local
 
