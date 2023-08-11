@@ -107,20 +107,16 @@ class UpdateUserView(APIView):
     serializer_class = serializers.UpdateUserSerializer
 
     def patch(self, request):
-        serializer = self.serializer_class(data=request.data)
+        user = User.objects.filter(id=request.user.id).first()
+        if user is None:
+            return Response({'status': False, 'message': 'user not found'})
+        serializer = self.serializer_class(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            user = User.objects.filter(id=request.user.id).first()
-            if user is None:
-                return Response({'status': False, 'message': 'user not found'})
-            user.first_name = serializer.data.get('first_name')
-            user.last_name = serializer.data.get('last_name')
-            user.username = serializer.data.get('username')
-            user.dob = serializer.data.get('dob')
-            user.hobbies = serializer.data.get('hobbies')
-            user.interests = serializer.data.get('interests')
-            user.save()
-        return Response({"status": True, "message": "user updated successfully"})
+            serializer.save()
+            return Response({"status": True, "message": "user updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=400)
+
 
 
 class UpdateProfilePictureView(CreateAPIView):

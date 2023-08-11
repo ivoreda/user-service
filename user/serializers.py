@@ -80,8 +80,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = models.CustomUser
         fields = ['id', 'email', 'first_name', 'last_name', 'currency_preference',
                   'profile_type', 'isActiveHost', 'username', 'phone_number',
-                  'dob', 'isVerified', 'gender', 'hobbies', 'interests',
-                  'is_staff', 'is_active', 'is_superuser']
+                  'dob', 'isVerified', 'gender', 'hobbies', 'interests', 'occupation',
+                  'location', 'is_staff', 'is_active', 'is_superuser']
 
     def get_currency_preference(self, obj):
         profile = models.Profile.objects.get(user=obj)
@@ -91,7 +91,7 @@ class UserSerializer(serializers.ModelSerializer):
         profile = models.Profile.objects.get(user=obj)
         return profile.profile_type
 
-    def _get_isAvtiveHost(self, obj):
+    def get_isActiveHost(self, obj):
         profile = models.Profile.objects.get(user=obj)
         return profile.isActiveHost
 
@@ -105,8 +105,10 @@ class ResponseSerializer(serializers.Serializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
+        # fields = '__all__'
         fields = ['first_name', 'last_name',
-                  'username', 'dob', 'hobbies', 'interests']
+                  'username', 'dob', 'hobbies', 'interests', 'occupation',
+                  'location']
 
 
 class UpdateProfilePictureSerializer(serializers.ModelSerializer):

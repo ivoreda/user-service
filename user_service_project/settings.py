@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "cloudinary",
     "rest_framework_simplejwt",
+    "drf_yasg",
 
     # Local
 
@@ -114,8 +115,8 @@ WSGI_APPLICATION = "user_service_project.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'railway',
-        'USER':'postgres',
+        'NAME': 'railway',
+        'USER': 'postgres',
         'PASSWORD': '8rCvFG2j9rqAV16QXRhy',
         'HOST': 'containers-us-west-157.railway.app',
         'PORT': 6061,
@@ -175,7 +176,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 
-
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     #  "DEFAULT_PERMISSION_CLASSES": [
@@ -189,9 +189,9 @@ REST_FRAMEWORK = {
 
 # CLoudinary config
 cloudinary.config(
-  cloud_name = "groundworks",
-  api_key = "665148592363434",
-  api_secret = "d00bD14YLSvFD6kaoeEUJ5rlz9U"
+    cloud_name="groundworks",
+    api_key="665148592363434",
+    api_secret="d00bD14YLSvFD6kaoeEUJ5rlz9U"
 )
 
 # Email config
