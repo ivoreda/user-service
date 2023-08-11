@@ -11,10 +11,14 @@ urlpatterns = [
     path('refresh-token/', TokenRefreshView.as_view(), name='refresh-token'),
     # path('login-old/', views.LoginView.as_view()),
     path('signup/', views.SignupView.as_view()),
+    path('host/signup/', views.HostSignupView.as_view(), name='host-signup'),
+
     path('get-user/', views.GetUserView.as_view()),
     path('update-user/', views.UpdateUserView.as_view()),
     path('deactivate-account/', views.DeactivateUserView.as_view()),
     path('activate-account/', views.ActivateUserView.as_view()),
+
+    path('become-a-host/', views.BecomeAHostView.as_view()),
 
     # path('update-profile-picture', views.UpdateProfilePictureView.as_view()),
 

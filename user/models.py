@@ -37,9 +37,10 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=15, unique=True)
+    business_name = models.CharField(max_length=255, blank=True, null=True)
     gender = models.CharField(max_length=15, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
-    username = models.CharField(max_length=20, unique=True)
+    username = models.CharField(max_length=20, unique=True, blank=True, null=True)
     hobbies = models.TextField(default='Hobbies', blank=True, null=True)
     interests = models.TextField(default='Interests', blank=True, null=True)
     isVerified = models.BooleanField(default=False)
@@ -49,7 +50,7 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
 
     def __str__(self) -> str:
-        return self.username
+        return self.first_name + " " + self.last_name
 
     @property
     def image_url(self):
@@ -58,14 +59,15 @@ class CustomUser(AbstractUser):
         )
 
 
-PROFILE_TYPE = (('Tenant', 'Tenant'),
-                ('Landlord', 'Landlord'),)
+PROFILE_TYPE = (('Guest', 'Guest'),
+                ('Host', 'Host'),)
 
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     currency_preference = models.CharField(default='NGN')
-    profile_type = models.CharField(choices=PROFILE_TYPE, default='Tenant', max_length=255)
+    profile_type = models.CharField(choices=PROFILE_TYPE, default='Guest', max_length=255)
     reason_for_deactivation = models.TextField(default='')
+    isActiveHost = models.BooleanField(default=False)
 
     @receiver(post_save, sender=CustomUser)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -100,3 +102,13 @@ class PasswordRecoveryLogs(models.Model):
 
     def __str__(self) -> str:
         return self.email
+
+
+class BecomeAHostNotification(models.Model):
+    user = models.CharField(max_length=30)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user

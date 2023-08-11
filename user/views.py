@@ -70,6 +70,27 @@ class SignupView(APIView):
         return Response({'status': 'True', 'message': 'user created successfully. Check your email for a verification code', 'data': serializer.data})
 
 
+class HostSignupView(APIView):
+    serializer_class = serializers.HostSignupSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        full_name = serializer.validated_data.get('first_name') + " " + serializer.validated_data.get('last_name')
+        print(full_name)
+        serializer.save()
+        notification = models.BecomeAHostNotification.objects.create(
+            user=full_name, message="This user wants to become a host. Please verify this user and change their profile type to host."
+        )
+        code = generate_user_verification_code()
+        user_email_verification_log = models.EmailVerificationLogs.objects.create(
+            email=email, code=code)
+        send_verification_code_to_email(
+            email, code, email_type='User verification')
+        return Response({'status': 'True', 'message': 'user created successfully. Check your email for a verification code', 'data': serializer.data})
+
+
 class GetUserView(APIView):
     # authentication_classes = [TokenAuthentication]
     serializer_class = serializers.UserSerializer
@@ -292,3 +313,15 @@ class ActivateUserView(APIView):
         user.profile.reason_for_deactivation = "Account is active."
         user.save()
         return Response({"status": True, "message": "Account has been activated successfully"})
+
+
+class BecomeAHostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_from_db = User.objects.get(id=self.request.user.id)
+        user_fullname = user_from_db.first_name + " " + user_from_db.last_name
+        notification = models.BecomeAHostNotification.objects.create(
+            user=user_fullname, message="This user wants to become a host. Please verify this user and change their profile type to host."
+        )
+        return Response({"status": True, "message": "Become a host request sent successfully"})
