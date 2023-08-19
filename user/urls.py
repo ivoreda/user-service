@@ -20,8 +20,6 @@ urlpatterns = [
 
     path('become-a-host/', views.BecomeAHostView.as_view()),
 
-    # path('update-profile-picture', views.UpdateProfilePictureView.as_view()),
-
     path('verify-email/', views.EmailVerificationView.as_view()),
     path('send-email-verification-code/', views.SendEmailVerificationCodeView.as_view(),
          name='send-email-verification-code'),

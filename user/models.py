@@ -42,6 +42,7 @@ class CustomUser(AbstractUser):
     dob = models.DateField(blank=True, null=True)
     username = models.CharField(max_length=20, unique=True, blank=True, null=True)
     hobbies = models.TextField(default='Hobbies', blank=True, null=True)
+    about = models.TextField(default='about', blank=True, null=True)
 
     occupation = models.CharField(default='occupation', blank=True, null=True)
     location = models.CharField(default='location', blank=True, null=True)
@@ -49,7 +50,9 @@ class CustomUser(AbstractUser):
 
     interests = models.TextField(default='Interests', blank=True, null=True)
     isVerified = models.BooleanField(default=False)
-    profile_picture = CloudinaryField('profile picture', null=True, default=None, blank=True)
+
+    profile_picture = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+
 
     REQUIRED_FIELDS = ['username']
     USERNAME_FIELD = 'email'

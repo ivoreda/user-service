@@ -14,6 +14,9 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.parsers import MultiPartParser
 from rest_framework import status
 
+import cloudinary
+import cloudinary.uploader
+
 
 from . import serializers
 from . import models
@@ -113,21 +116,22 @@ class UpdateUserView(APIView):
         serializer = self.serializer_class(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
+            image_fields = ['profile_picture']
+            upload_results = []
+
+            for field in image_fields:
+                image_file = request.data.get(field)
+                if image_file:
+                    upload_result = cloudinary.uploader.upload(
+                        image_file)
+                    upload_results.append(upload_result['secure_url'])
+                    serializer.validated_data[field] = upload_result['secure_url']
+                    user = serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
             serializer.save()
             return Response({"status": True, "message": "user updated successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=400)
-
-
-
-class UpdateProfilePictureView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = serializers.UpdateProfilePictureSerializer
-    parser_classes = (MultiPartParser,)
-
-    def patch(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            image = serializer.data.get('profile_picture')
 
 
 def generate_user_verification_code():

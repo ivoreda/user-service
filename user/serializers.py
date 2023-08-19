@@ -78,9 +78,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name', 'currency_preference',
+        fields = ['id', 'email', 'first_name', 'last_name', 'profile_picture', 'currency_preference',
                   'profile_type', 'isActiveHost', 'username', 'phone_number',
-                  'dob', 'isVerified', 'gender', 'hobbies', 'interests', 'occupation',
+                  'dob', 'isVerified', 'gender', 'hobbies', 'interests',
+                  'occupation', 'business_name', 'about',
                   'location', 'is_staff', 'is_active', 'is_superuser']
 
     def get_currency_preference(self, obj):
@@ -106,23 +107,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
         # fields = '__all__'
-        fields = ['first_name', 'last_name',
-                  'username', 'dob', 'hobbies', 'interests', 'occupation',
-                  'location']
-
-
-class UpdateProfilePictureSerializer(serializers.ModelSerializer):
-    profile_picture_url = serializers.ReadOnlyField()
-
-    class Meta:
-        model = models.CustomUser
-        fields = ['profile_picture_url', 'profile_picture']
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("profie_picture")
-
-        return representation
+        fields = ['first_name', 'last_name', 'username', 'dob',
+                  'hobbies', 'interests', 'occupation', 'business_name',
+                  'profile_picture', 'location']
 
 
 class ChangePasswordSerializer(serializers.Serializer):
