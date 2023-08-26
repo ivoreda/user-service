@@ -11,7 +11,7 @@ urlpatterns = [
     path('refresh-token/', TokenRefreshView.as_view(), name='refresh-token'),
     # path('login-old/', views.LoginView.as_view()),
     path('signup/', views.SignupView.as_view()),
-    path('host/signup/', views.HostSignupView.as_view(), name='host-signup'),
+    # path('host/signup/', views.HostSignupView.as_view(), name='host-signup'),
 
     path('get-user/', views.GetUserView.as_view()),
     path('update-user/', views.UpdateUserView.as_view()),

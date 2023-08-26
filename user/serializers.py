@@ -17,11 +17,13 @@ class LoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 
-class UserSignupSerializer(serializers.ModelSerializer):
+class SignupSerializer(serializers.ModelSerializer):
+    profile_type = serializers.CharField()
+
     class Meta:
         model = models.CustomUser
-        fields = ['email', 'username', 'phone_number',
-                  'dob', 'gender', 'first_name', 'last_name', 'password']
+        fields = ['email', 'phone_number', 'profile_type',
+                'first_name', 'last_name', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_email(self, value):
@@ -33,14 +35,21 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
+        profile_type = validated_data.pop('profile_type', None)
         instance = self.Meta.model(**validated_data)
         if password is not None:
             instance.set_password(password)
+        if profile_type is not None and profile_type not in ['Host', 'Guest']:
+            raise serializers.ValidationError({'status': False, 'message': 'profile_type should be either Host or Guest'})
+        instance.profile_type = profile_type
         instance.save()
         return instance
 
 
 class HostSignupSerializer(serializers.ModelSerializer):
+    """This is no longer in use because we have
+    made the signup process for both Host and Guest
+    into one endpoint"""
     profile_type = serializers.SerializerMethodField()
 
     class Meta:
@@ -106,10 +115,9 @@ class ResponseSerializer(serializers.Serializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
-        # fields = '__all__'
-        fields = ['first_name', 'last_name', 'username', 'dob',
+        fields = ['first_name', 'last_name', 'username', 'dob', 'gender',
                   'hobbies', 'interests', 'occupation', 'business_name',
-                  'profile_picture', 'location']
+                  'profile_picture', 'location', 'about']
 
 
 class ChangePasswordSerializer(serializers.Serializer):

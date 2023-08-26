@@ -51,7 +51,7 @@ class CustomUser(AbstractUser):
     interests = models.TextField(default='Interests', blank=True, null=True)
     isVerified = models.BooleanField(default=False)
 
-    profile_picture = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+    profile_picture = models.ImageField(blank=True, null=True)
 
 
     REQUIRED_FIELDS = ['username']
@@ -59,12 +59,6 @@ class CustomUser(AbstractUser):
 
     def __str__(self) -> str:
         return self.first_name + " " + self.last_name
-
-    @property
-    def image_url(self):
-        return (
-            f"https://res.cloudinary.com/dpoix2ilz/{self.profile_picture}"
-        )
 
 
 PROFILE_TYPE = (('Guest', 'Guest'),

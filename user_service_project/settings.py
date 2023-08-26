@@ -208,8 +208,6 @@ CLOUDINARY_STORAGE = {"CLOUD_NAME": "groundworks",
                       "API_KEY": "665148592363434",
                       "API_SECRET": "d00bD14YLSvFD6kaoeEUJ5rlz9U"}
 
-
-
 # Email config
 EMAIL_HOST = 'mail.the99keys.com'
 EMAIL_HOST_USER = 'ivor.e@the99keys.com'

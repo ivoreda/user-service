@@ -58,13 +58,21 @@ class LoginView(APIView):
 
 
 class SignupView(APIView):
-    serializer_class = serializers.UserSignupSerializer
+    serializer_class = serializers.SignupSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
-        serializer.save()
+        full_name = serializer.validated_data.get('first_name') + " " + serializer.validated_data.get('last_name')
+        user = serializer.save()
+        user.profile.profile_type = serializer.validated_data.get('profile_type')
+        user.username = email.split('@')[0]
+        user.save()
+        if user.profile.profile_type == 'Host':
+            notification = models.BecomeAHostNotification.objects.create(
+                user=full_name, message="This user wants to become a host. Please verify this user and make them an active host."
+            )
         code = generate_user_verification_code()
         user_email_verification_log = models.EmailVerificationLogs.objects.create(
             email=email, code=code)
@@ -81,7 +89,6 @@ class HostSignupView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
         full_name = serializer.validated_data.get('first_name') + " " + serializer.validated_data.get('last_name')
-        print(full_name)
         serializer.save()
         notification = models.BecomeAHostNotification.objects.create(
             user=full_name, message="This user wants to become a host. Please verify this user and change their profile type to host."
@@ -117,19 +124,14 @@ class UpdateUserView(APIView):
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             image_fields = ['profile_picture']
-            upload_results = []
-
+            upload_results = {}
             for field in image_fields:
                 image_file = request.data.get(field)
                 if image_file:
-                    upload_result = cloudinary.uploader.upload(
-                        image_file)
-                    upload_results.append(upload_result['secure_url'])
-                    serializer.validated_data[field] = upload_result['secure_url']
-                    user = serializer.save()
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-            serializer.save()
+                    upload_result = cloudinary.uploader.upload(image_file)
+                    upload_results[field] = upload_result['secure_url']
+                    serializer.validated_data[field] = upload_results[field]
+            user = serializer.save()
             return Response({"status": True, "message": "user updated successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=400)
 
