@@ -26,4 +26,8 @@ urlpatterns = [
     path('forgot-password/', views.ForgotPasswordView.as_view()),
     path('reset-password/', views.ResetPasswordView.as_view()),
     path('change-password/', views.ChangePasswordView.as_view()),
+
+    path("test-sending-email/", views.TestEmailView.as_view()),
+    path("test-uploading-images/", views.TestImageUploadView.as_view()),
+
 ]

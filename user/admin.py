@@ -10,6 +10,8 @@ admin.site.register(models.Profile)
 admin.site.register(models.EmailVerificationLogs)
 admin.site.register(models.PasswordRecoveryLogs)
 
+admin.site.register(models.ImageTestModel)
+
 
 class BecomeAHostNotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'message', 'timestamp', 'is_read')

@@ -191,3 +191,16 @@ class ActivateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CustomUser
         fields = ['email']
+
+class BecomeAHostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CustomUser
+        fields = ['business_name']
+
+
+
+class TestImageUploadSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ImageTestModel
+        fields = "__all__"

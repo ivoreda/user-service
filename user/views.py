@@ -82,6 +82,10 @@ class SignupView(APIView):
 
 
 class HostSignupView(APIView):
+    """This is no longer in use because we have
+    made the signup process for both Host and Guest
+    into one endpoint"""
+
     serializer_class = serializers.HostSignupSerializer
 
     def post(self, request):
@@ -318,12 +322,53 @@ class ActivateUserView(APIView):
 
 
 class BecomeAHostView(APIView):
+    serializer_class = serializers.BecomeAHostSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user_from_db = User.objects.get(id=self.request.user.id)
+        user_from_db.business_name = request.data.get('business_name')
+        user_from_db.profile.profile_type = 'Host'
+        user_from_db.save()
         user_fullname = user_from_db.first_name + " " + user_from_db.last_name
         notification = models.BecomeAHostNotification.objects.create(
             user=user_fullname, message="This user wants to become a host. Please verify this user and change their profile type to host."
         )
+
         return Response({"status": True, "message": "Become a host request sent successfully"})
+
+class TestEmailView(APIView):
+
+    def post(self, request):
+         email = 'ivoredafej@gmail.com'
+         code = 'this is a test email'
+         send_verification_code_to_email(
+            email, code, email_type='User verification')
+         return Response({"success"})
+
+
+class TestImageUploadView(APIView):
+    serializer_class = serializers.TestImageUploadSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, partial=True)
+        if serializer.is_valid():
+            image_fields = ['image']
+            upload_results = {}
+
+            for field in image_fields:
+                image_file = request.data.get(field)
+                if image_file:
+                    upload_result = cloudinary.uploader.upload(image_file)
+                    upload_results[field] = upload_result['secure_url']
+                    serializer.validated_data[field] = upload_results[field]
+                    serializer.save()
+            return Response({"status": True, "message": "image uploaded successfully"}, status=status.HTTP_200_OK)
+
+    def get(self, request):
+        image_link = models.ImageTestModel.objects.filter(id=request.data.get('id'))
+        print(image_link.values())
+        qs = self.serializer_class(image_link)
+        print("***************************")
+        print(qs.data)
+        return Response({"image": qs.data})

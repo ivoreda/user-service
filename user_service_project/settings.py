@@ -216,6 +216,14 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+# New email config
+# EMAIL_HOST = 'mail.the99apartments.com'
+# EMAIL_HOST_USER = 'hello@the99apartments.com'
+# EMAIL_HOST_PASSWORD = "1dhuc+$w3^^f"
+# EMAIL_PORT = 465
+# EMAIL_USE_TLS = True
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 SIMPLE_JWT = {
     # Overriding the access token lifetime from the default 5 minutes to 1 day
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),

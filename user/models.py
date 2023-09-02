@@ -114,3 +114,10 @@ class BecomeAHostNotification(models.Model):
 
     def __str__(self):
         return self.user
+
+
+class ImageTestModel(models.Model):
+    image = models.ImageField()
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
