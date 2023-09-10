@@ -64,9 +64,11 @@ class SignupView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
-        full_name = serializer.validated_data.get('first_name') + " " + serializer.validated_data.get('last_name')
+        full_name = serializer.validated_data.get(
+            'first_name') + " " + serializer.validated_data.get('last_name')
         user = serializer.save()
-        user.profile.profile_type = serializer.validated_data.get('profile_type')
+        user.profile.profile_type = serializer.validated_data.get(
+            'profile_type')
         user.username = email.split('@')[0]
         user.save()
         if user.profile.profile_type == 'Host':
@@ -92,7 +94,8 @@ class HostSignupView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
-        full_name = serializer.validated_data.get('first_name') + " " + serializer.validated_data.get('last_name')
+        full_name = serializer.validated_data.get(
+            'first_name') + " " + serializer.validated_data.get('last_name')
         serializer.save()
         notification = models.BecomeAHostNotification.objects.create(
             user=full_name, message="This user wants to become a host. Please verify this user and change their profile type to host."
@@ -124,7 +127,8 @@ class UpdateUserView(APIView):
         user = User.objects.filter(id=request.user.id).first()
         if user is None:
             return Response({'status': False, 'message': 'user not found'})
-        serializer = self.serializer_class(user, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             image_fields = ['profile_picture']
@@ -186,32 +190,35 @@ class EmailVerificationView(APIView):
 
 class SendEmailVerificationCodeView(APIView):
     serializer_class = serializers.SendEmailVerificationCodeSerializer
-    # authentication_classes = [TokenAuthentication]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user_email = serializer.data.get('email')
             user = models.CustomUser.objects.filter(email=user_email).first()
+            if user is None:
+                return Response({"status": False, "message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
             if user.isVerified:
-                return Response({"status": False, "message": "this user is already verified"})
+                return Response({"status": False, "message": "This user is already verified"})
             elif not user.isVerified:
                 code = generate_user_verification_code()
                 log = models.EmailVerificationLogs.objects.filter(
                     email=user_email).first()
-                if not log:
+                if log is None:
                     new_log = models.EmailVerificationLogs.objects.create(
                         email=user_email, code=code)
                     send_verification_code_to_email(
                         user_email, code, email_type='User verification')
-                    return Response({"status": True, "message": "verification code sent to {email}".format(email=user_email)})
-                if log.isUsed:
+                    return Response({"status": True, "message": f"Verification code sent to {user_email}"})
+                if log:
                     log.isUsed = False
                     log.code = generate_user_verification_code()
                     log.save()
                     send_verification_code_to_email(
                         user_email, log.code, email_type='User verification')
-                    return Response({"status": True, "message": "verification code sent to {email}".format(email=user_email)})
+                    return Response({"status": True, "message": f"Verification code sent to {user_email}"})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgotPasswordView(APIView):
@@ -337,14 +344,15 @@ class BecomeAHostView(APIView):
 
         return Response({"status": True, "message": "Become a host request sent successfully"})
 
+
 class TestEmailView(APIView):
 
     def post(self, request):
-         email = 'ivoredafej@gmail.com'
-         code = 'this is a test email'
-         send_verification_code_to_email(
+        email = 'ivoredafej@gmail.com'
+        code = 'this is a test email'
+        send_verification_code_to_email(
             email, code, email_type='User verification')
-         return Response({"success"})
+        return Response({"success"})
 
 
 class TestImageUploadView(APIView):
@@ -366,7 +374,8 @@ class TestImageUploadView(APIView):
             return Response({"status": True, "message": "image uploaded successfully"}, status=status.HTTP_200_OK)
 
     def get(self, request):
-        image_link = models.ImageTestModel.objects.filter(id=request.data.get('id'))
+        image_link = models.ImageTestModel.objects.filter(
+            id=request.data.get('id'))
         print(image_link.values())
         qs = self.serializer_class(image_link)
         print("***************************")
