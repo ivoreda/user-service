@@ -84,11 +84,12 @@ class UserSerializer(serializers.ModelSerializer):
     currency_preference = serializers.SerializerMethodField()
     profile_type = serializers.SerializerMethodField()
     isActiveHost = serializers.SerializerMethodField()
+    has_made_host_request = serializers.SerializerMethodField()
 
     class Meta:
         model = models.CustomUser
         fields = ['id', 'email', 'first_name', 'last_name', 'profile_picture', 'currency_preference',
-                  'profile_type', 'isActiveHost', 'username', 'phone_number',
+                  'profile_type', 'isActiveHost', 'has_made_host_request', 'username', 'phone_number',
                   'dob', 'isVerified', 'gender', 'hobbies', 'interests',
                   'occupation', 'business_name', 'about',
                   'location', 'is_staff', 'is_active', 'is_superuser']
@@ -104,6 +105,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_isActiveHost(self, obj):
         profile = models.Profile.objects.get(user=obj)
         return profile.isActiveHost
+    
+    def get_has_made_host_request(self, obj):
+        profile = models.Profile.objects.get(user=obj)
+        return profile.has_made_host_request
 
 
 class ResponseSerializer(serializers.Serializer):
@@ -165,7 +170,7 @@ class VerifyEmailWithCodeSerializer(serializers.ModelSerializer):
 
 class CustomTokenGeneratorSerializer(TokenObtainPairSerializer):
     default_error_messages = {
-        'no_active_account': _('invalid credentials')
+        'no_active_account': _('invalid credentials or account is inactive')
     }
 
     @classmethod

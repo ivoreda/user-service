@@ -68,6 +68,7 @@ class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     currency_preference = models.CharField(default='NGN')
     profile_type = models.CharField(choices=PROFILE_TYPE, default='Guest', max_length=255)
+    has_made_host_request = models.BooleanField(default=False)
     reason_for_deactivation = models.TextField(default='')
     isActiveHost = models.BooleanField(default=False)
 

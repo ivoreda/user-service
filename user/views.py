@@ -210,7 +210,7 @@ class SendEmailVerificationCodeView(APIView):
                     send_verification_code_to_email(
                         user_email, code, email_type='User verification')
                     return Response({"status": True, "message": f"Verification code sent to {user_email}"})
-                if log:
+                else:
                     log.isUsed = False
                     log.code = generate_user_verification_code()
                     log.save()
@@ -336,6 +336,7 @@ class BecomeAHostView(APIView):
         user_from_db = User.objects.get(id=self.request.user.id)
         user_from_db.business_name = request.data.get('business_name')
         user_from_db.profile.profile_type = 'Host'
+        user_from_db.profile.has_made_host_request = True
         user_from_db.save()
         user_fullname = user_from_db.first_name + " " + user_from_db.last_name
         notification = models.BecomeAHostNotification.objects.create(
