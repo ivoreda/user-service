@@ -228,8 +228,9 @@ class ForgotPasswordView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             email = serializer.data.get('email').lower()
-            user = User.objects.get(email=email)
-            if not user:
+            try:
+                user = User.objects.get(email=email)
+            except Exception:
                 return Response({"status": False, "message": "User with this email {email} does not exist".format(email=email)})
             log = models.PasswordRecoveryLogs.objects.filter(
                 email=email).first()
@@ -305,7 +306,10 @@ class DeactivateUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        user = User.objects.get(id=request.user.id)
+        try:
+            user = User.objects.get(id=request.user.id)
+        except Exception:
+            raise AuthenticationFailed('user not found')
         user.is_active = False
         user.profile.reason_for_deactivation = request.data['reason_for_deactivation']
         user.save()
@@ -317,8 +321,9 @@ class ActivateUserView(APIView):
 
     def post(self, request):
         email = request.data.get('email')
-        user = User.objects.get(email=email)
-        if user is None:
+        try:
+            user = User.objects.get(email=email)
+        except Exception:
             return Response({"status": False, "message": "Account does not exist"})
         if user.is_active == True:
             return Response({"status": False, "message": "Account is already activated"})
